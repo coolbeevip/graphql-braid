@@ -1,5 +1,26 @@
 package com.atlassian.braid;
 
+import static com.atlassian.braid.Util.read;
+import static com.atlassian.braid.graphql.language.GraphQLNodes.printNode;
+import static com.atlassian.braid.java.util.BraidObjects.cast;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildDocumentMapperFactory;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildExtensions;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildLinks;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildMutationAliases;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildQueryFieldRenames;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildSchemaLoader;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildSchemaNamespace;
+import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildTypeRenames;
+import static com.google.common.base.MoreObjects.toStringHelper;
+import static com.google.common.base.Suppliers.memoize;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
+
 import com.atlassian.braid.java.util.BraidMaps;
 import com.atlassian.braid.java.util.BraidObjects;
 import com.atlassian.braid.source.MapGraphQLError;
@@ -13,12 +34,8 @@ import graphql.execution.DataFetcherResult;
 import graphql.language.Document;
 import graphql.parser.Parser;
 import graphql.schema.idl.SchemaPrinter;
-import org.junit.rules.MethodRule;
-import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.Statement;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,27 +44,10 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.atlassian.braid.Util.read;
-import static com.atlassian.braid.graphql.language.GraphQLNodes.printNode;
-import static com.atlassian.braid.java.util.BraidObjects.cast;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildDocumentMapperFactory;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildExtensions;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildLinks;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildMutationAliases;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildQueryFieldRenames;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildSchemaNamespace;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildSchemaLoader;
-import static com.atlassian.braid.source.yaml.YamlRemoteSchemaSourceBuilder.buildTypeRenames;
-import static com.google.common.base.MoreObjects.toStringHelper;
-import static com.google.common.base.Suppliers.memoize;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertEquals;
+import org.junit.rules.MethodRule;
+import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.Statement;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Executes a test by using the test name to find a yml file containing all the information to execute and test a
@@ -204,11 +204,11 @@ public class YamlBraidExecutionRule implements MethodRule {
         }
 
         Map<String, Object> getVariables() {
-            return BraidMaps.get(requestMap, "variables").map(BraidObjects::<Map<String, Object>>cast).orElse(null);
+            return BraidMaps.get(requestMap, "variables").map(BraidObjects::<Map<String, Object>>cast).orElse(new HashMap<>());
         }
 
         Optional<String> getOperation() {
-            return Optional.ofNullable(requestMap.get("operation")).map(String.class::cast);
+            return Optional.ofNullable(requestMap.get("operationName")).map(String.class::cast);
         }
     }
 

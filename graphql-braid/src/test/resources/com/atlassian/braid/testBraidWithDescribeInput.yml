@@ -1,0 +1,54 @@
+request:
+  query: |
+    query {
+      __type(name:"FooInput") {
+        name
+        description
+        inputFields{
+          name
+          description
+        }
+      }
+    }
+  variables:
+    id: fooid
+
+response:
+  errors: []
+  data:
+    __type:
+      name: FooInput
+      description: FooInput
+      inputFields:
+        - name: id
+          description: FooInput's id param
+schemaSources:
+  - namespace: foo
+    schema: |
+      schema {
+          query: Query
+      }
+      """
+      FooInput
+      """
+      input FooInput {
+        """
+        FooInput's id param
+        """
+        id: String
+      }
+      type Foo {
+          id: String
+          name: String
+          bar: Int
+      }
+  - namespace: bar
+    schema: |
+      schema {
+          query: Query
+      }
+      type Bar {
+          id: Int
+          title: String
+          baz: String
+      }

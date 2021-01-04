@@ -1,5 +1,7 @@
 package com.atlassian.braid.graphql.language;
 
+import static java.util.stream.Collectors.toList;
+
 import graphql.language.Argument;
 import graphql.language.ArrayValue;
 import graphql.language.BooleanValue;
@@ -40,10 +42,7 @@ import graphql.language.UnionTypeDefinition;
 import graphql.language.Value;
 import graphql.language.VariableDefinition;
 import graphql.language.VariableReference;
-
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -57,7 +56,7 @@ public class NodeTransformer {
                 b.value(value(node.getValue())));
     }
 
-    
+
     public ArrayValue arrayValue(ArrayValue node) {
         return node.transform(b ->
                 b.values(node.getValues().stream()
@@ -65,12 +64,12 @@ public class NodeTransformer {
                         .collect(toList())));
     }
 
-    
+
     public BooleanValue booleanValue(BooleanValue node) {
         return node;
     }
 
-    
+
     public Directive directive(Directive node) {
         return node.transform(b ->
                 b.arguments(node.getArguments().stream()
@@ -78,7 +77,7 @@ public class NodeTransformer {
                         .collect(toList())));
     }
 
-    
+
     public DirectiveDefinition directiveDefinition(DirectiveDefinition node) {
         return node.transform(b ->
                 b.inputValueDefinitions(transformInputValues( node.getInputValueDefinitions()))
@@ -87,12 +86,12 @@ public class NodeTransformer {
                                 .collect(toList())));
     }
 
-    
+
     public DirectiveLocation directiveLocation(DirectiveLocation node) {
         return node;
     }
 
-    
+
     public Document document(Document node) {
         return node.transform(b ->
                 b.definitions(node.getDefinitions().stream()
@@ -100,7 +99,7 @@ public class NodeTransformer {
                         .collect(toList())));
     }
 
-    
+
     public EnumTypeDefinition enumTypeDefinition(EnumTypeDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
@@ -109,18 +108,18 @@ public class NodeTransformer {
                                 .collect(toList())));
     }
 
-    
+
     public EnumValue enumValue(EnumValue node) {
         return node;
     }
 
-    
+
     public EnumValueDefinition enumValueDefinition(EnumValueDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives())));
     }
 
-    
+
     public Field field(Field node) {
         return node.transform(b ->
                 b.arguments(node.getArguments().stream()
@@ -130,7 +129,7 @@ public class NodeTransformer {
                         .directives(transformDirectives(node.getDirectives())));
     }
 
-    
+
     public FieldDefinition fieldDefinition(FieldDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
@@ -138,12 +137,12 @@ public class NodeTransformer {
                         .inputValueDefinitions(transformInputValues(node.getInputValueDefinitions())));
     }
 
-    
+
     public FloatValue floatValue(FloatValue node) {
         return node;
     }
 
-    
+
     public FragmentDefinition fragmentDefinition(FragmentDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
@@ -151,13 +150,13 @@ public class NodeTransformer {
                         .typeCondition(typeName(node.getTypeCondition())));
     }
 
-    
+
     public FragmentSpread fFragmentSpread(FragmentSpread node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives())));
     }
 
-    
+
     public InlineFragment inlineFragment(InlineFragment node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
@@ -165,61 +164,61 @@ public class NodeTransformer {
                         .typeCondition(typeName(node.getTypeCondition())));
     }
 
-    
+
     public InputObjectTypeDefinition inputObjectTypeDefinition(InputObjectTypeDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
                         .inputValueDefinitions(transformInputValues(node.getInputValueDefinitions())));
     }
 
-    
+
     public InputValueDefinition inputValueDefinition(InputValueDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives())));
     }
 
-    
+
     public IntValue intValue(IntValue node) {
         return node;
     }
 
-    
+
     public InterfaceTypeDefinition interfaceTypeDefinition(InterfaceTypeDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
                         .definitions(transformFieldDefinitions(node.getFieldDefinitions())));
     }
 
-    
+
     public ListType listType(ListType node) {
         return node.transform(b ->
                 b.type(type(node.getType())));
     }
 
-    
+
     public NonNullType nonNullType(NonNullType node) {
         return node.transform(b ->
                 b.type(type(node.getType())));
     }
 
-    
+
     public NullValue nullValue(NullValue node) {
         return node;
     }
 
-    
+
     public ObjectField objectField(ObjectField node) {
         return node;
     }
 
-    
+
     public ObjectTypeDefinition objectTypeDefinition(ObjectTypeDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
                         .fieldDefinitions(transformFieldDefinitions(node.getFieldDefinitions())));
     }
 
-    
+
     public ObjectValue objectValue(ObjectValue node) {
         return node.transform(b ->
                 b.objectFields(node.getObjectFields().stream()
@@ -227,7 +226,7 @@ public class NodeTransformer {
                     .collect(toList())));
     }
 
-    
+
     public OperationDefinition operationDefinition(OperationDefinition node) {
         return node.transform(b ->
                 b.variableDefinitions(node.getVariableDefinitions().stream()
@@ -237,19 +236,19 @@ public class NodeTransformer {
                         .directives(transformDirectives(node.getDirectives())));
     }
 
-    
+
     public OperationTypeDefinition operationTypeDefinition(OperationTypeDefinition node) {
         return node.transform(b ->
-                b.type(type(node.getType())));
+                b.typeName(node.getTypeName()));
     }
 
-    
+
     public ScalarTypeDefinition scalarTypeDefinition(ScalarTypeDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives())));
     }
 
-    
+
     public SchemaDefinition schemaDefinition(SchemaDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
@@ -258,7 +257,7 @@ public class NodeTransformer {
                         .collect(toList())));
     }
 
-    
+
     public SelectionSet selectionSet(SelectionSet node) {
         if (node == null) {
             return null;
@@ -269,17 +268,17 @@ public class NodeTransformer {
                             .collect(toList())));
     }
 
-    
+
     public StringValue stringValue(StringValue node) {
         return node;
     }
 
-    
+
     public TypeName typeName(TypeName node) {
         return node;
     }
 
-    
+
     public UnionTypeDefinition unionTypeDefinition(UnionTypeDefinition node) {
         return node.transform(b ->
                 b.directives(transformDirectives(node.getDirectives()))
@@ -288,13 +287,13 @@ public class NodeTransformer {
                             .collect(toList())));
     }
 
-    
+
     public VariableDefinition variableDefinition(VariableDefinition node) {
         return node.transform(b ->
                 b.type(type(node.getType())));
     }
 
-    
+
     public VariableReference variableReference(VariableReference node) {
         return node;
     }

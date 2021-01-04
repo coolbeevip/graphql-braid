@@ -9,19 +9,19 @@ import graphql.language.NodeTraverser;
 import graphql.language.NodeVisitor;
 import graphql.language.OperationDefinition;
 import graphql.schema.DataFetchingEnvironment;
-
 import java.util.List;
 
 class QueryTransformationUtils {
 
     static OperationDefinition getOperationDefinition(DataFetchingEnvironment environment) {
-        return environment.getExecutionContext().getOperationDefinition();
+      return environment.getOperationDefinition();
     }
 
     static FieldWithCounter cloneTrimAndAliasField(FieldTransformationContext fieldTransformationContext, List<Integer> usedCounterIds,
                                                    DataFetchingEnvironment environment, boolean dontTrimFirstField) {
-        Field field = environment.getField().deepCopy();
-        field.setAlias(field.getName() + fieldTransformationContext.getCounter().incrementAndGet());
+
+        Field origonfield = environment.getField().deepCopy();
+        Field field = origonfield.transform(f -> f.alias(origonfield.getName() + fieldTransformationContext.getCounter().incrementAndGet()));
         usedCounterIds.add(fieldTransformationContext.getCounter().get());
 
         List<FragmentDefinition> referencedFragments = TrimFieldsSelection.trimFieldSelection(fieldTransformationContext.getSchemaSource(), environment, field, dontTrimFirstField);

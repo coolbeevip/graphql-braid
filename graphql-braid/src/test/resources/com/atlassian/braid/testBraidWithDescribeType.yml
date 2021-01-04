@@ -1,0 +1,71 @@
+request:
+  query: |
+    query {
+      __type(name:"Foo") {
+        name
+        description
+        fields{
+          name
+          description
+        }
+      }
+    }
+  variables:
+    id: fooid
+
+response:
+  errors: []
+  data:
+    __type:
+      name: Foo
+      description: Foo as a type
+      fields:
+        - name: id
+          description:  id as Foo's property
+        - name: name
+          description: name as Foo's property
+        - name: bar
+          description: bar as Foo's property
+schemaSources:
+  - namespace: foo
+    schema: |
+      schema {
+          query: Query
+      }
+
+      """
+      Foo as a type
+      """
+      type Foo {
+          """
+          id as Foo's property
+          """
+          id: String
+          """
+          name as Foo's property
+          """
+          name: String
+          """
+          bar as Foo's property
+          """
+          bar: Int
+      }
+  - namespace: bar
+    schema: |
+      schema {
+          query: Query
+      }
+      type Bar {
+          """
+          id as Bar's property
+          """
+          id: Int
+          """
+          title as Bar's property
+          """
+          title: String
+          """
+          baz as Bar's property
+          """
+          baz: String
+      }

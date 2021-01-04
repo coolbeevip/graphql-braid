@@ -39,6 +39,7 @@ schemaSources:
             bars100: barIds
         }
       variables: {}
+      operationName: Bulk_Bar
     response:
       data:
         bars100: barIdValue

@@ -1,5 +1,11 @@
 package com.atlassian.braid;
 
+import static com.atlassian.braid.LinkArgument.ArgumentSource.OBJECT_FIELD;
+import static com.atlassian.braid.java.util.BraidOptionals.firstNonEmpty;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+
 import graphql.language.FieldDefinition;
 import graphql.language.ListType;
 import graphql.language.NonNullType;
@@ -9,19 +15,12 @@ import graphql.language.SchemaDefinition;
 import graphql.language.Type;
 import graphql.language.TypeName;
 import graphql.schema.idl.TypeDefinitionRegistry;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import static com.atlassian.braid.LinkArgument.ArgumentSource.OBJECT_FIELD;
-import static com.atlassian.braid.java.util.BraidOptionals.firstNonEmpty;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Utils for helping to navigate types
@@ -227,7 +226,7 @@ public final class TypeUtils {
 
     private static Function<OperationTypeDefinition, Optional<ObjectTypeDefinition>> getObjectTypeDefinition(
             TypeDefinitionRegistry registry) {
-        return otd -> registry.getType(otd.getType()).map(ObjectTypeDefinition.class::cast);
+        return otd -> registry.getType(otd.getTypeName()).map(ObjectTypeDefinition.class::cast);
     }
 
     private static Optional<ObjectTypeDefinition> getObjectTypeDefinitionByName(TypeDefinitionRegistry registry, String typeName) {

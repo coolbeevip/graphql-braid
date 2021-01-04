@@ -1,7 +1,7 @@
 request:
   query: |
     query($id: String!) {
-      foo(id: $id) { 
+      foo(id: $id) {
         ...namedFrag
         bar {
           key
@@ -21,10 +21,13 @@ response:
     - message: bad rating
       extensions:
         somekey: somevalue
+        classification: DataFetchingException
     - message: "Cannot return null for non-nullable type: 'Bar' within parent 'Foo2' (/foo/bar)"
       path:
         - foo
         - bar
+      extensions:
+        classification: DataFetchingException
   data:
     foo: null
 

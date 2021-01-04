@@ -1,5 +1,11 @@
 package com.atlassian.braid.transformation;
 
+import static com.atlassian.braid.transformation.QueryTransformationUtils.addFieldToQuery;
+import static com.atlassian.braid.transformation.QueryTransformationUtils.cloneTrimAndAliasField;
+import static com.atlassian.braid.transformation.QueryTransformationUtils.getOperationDefinition;
+import static java.util.Collections.singletonList;
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import com.atlassian.braid.Extension;
 import com.atlassian.braid.FieldRename;
 import com.atlassian.braid.FieldTransformation;
@@ -8,16 +14,9 @@ import graphql.execution.DataFetcherResult;
 import graphql.language.Field;
 import graphql.language.SelectionSet;
 import graphql.schema.DataFetchingEnvironment;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
-import static com.atlassian.braid.transformation.QueryTransformationUtils.addFieldToQuery;
-import static com.atlassian.braid.transformation.QueryTransformationUtils.cloneTrimAndAliasField;
-import static com.atlassian.braid.transformation.QueryTransformationUtils.getOperationDefinition;
-import static java.util.Collections.singletonList;
-import static java.util.concurrent.CompletableFuture.completedFuture;
 
 
 /**
@@ -40,7 +39,7 @@ public class TopLevelFieldTransformation implements FieldTransformation {
 
         // maybe a link did change the toplevel field already
         if (fieldRename.getBraidName().equals(field.field.getName()) && !fieldRename.getSourceName().equals(field.field.getName())) {
-            field.field.setName(fieldRename.getSourceName());
+            field.field = field.field.transform(f -> f.name(fieldRename.getSourceName()));
         }
         fieldRename.applyForQuery(environment, field.field);
 

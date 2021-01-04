@@ -1,5 +1,8 @@
 package com.atlassian.braid.graphql.language;
 
+import static graphql.schema.GraphQLTypeUtil.unwrapAll;
+import static java.util.stream.Collectors.toSet;
+
 import com.atlassian.braid.FieldTransformationContext;
 import com.atlassian.braid.transformation.BraidSchemaSource;
 import graphql.language.Document;
@@ -9,10 +12,7 @@ import graphql.language.TypeName;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
-
 import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
 
 
 public class DocumentTransformations {
@@ -20,7 +20,7 @@ public class DocumentTransformations {
     public static Document removeMissingFieldsIfBraidAndSourceTypeFieldsDiffer(FieldTransformationContext context, Document document,
                                                                                GraphQLOutputType fieldOutputType) {
         BraidSchemaSource ds = new BraidSchemaSource(context.getSchemaSource());
-        return ds.getSchemaSource().getPrivateSchema().getType(ds.getSourceTypeName(fieldOutputType.getName()))
+        return ds.getSchemaSource().getPrivateSchema().getType(ds.getSourceTypeName(unwrapAll(fieldOutputType).getName()))
 
                 .map(type -> {
                     if (fieldOutputType instanceof GraphQLObjectType && type instanceof ObjectTypeDefinition) {

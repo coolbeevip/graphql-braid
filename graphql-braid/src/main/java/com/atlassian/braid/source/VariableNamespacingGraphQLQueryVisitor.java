@@ -1,5 +1,8 @@
 package com.atlassian.braid.source;
 
+import static com.atlassian.braid.source.NamespacedVariableReference.namespacedVariableReference;
+import static java.util.stream.Collectors.toList;
+
 import graphql.language.Argument;
 import graphql.language.ArrayValue;
 import graphql.language.Directive;
@@ -9,6 +12,8 @@ import graphql.language.NodeVisitorStub;
 import graphql.language.ObjectField;
 import graphql.language.ObjectValue;
 import graphql.language.OperationDefinition;
+import graphql.language.Selection;
+import graphql.language.SelectionSet;
 import graphql.language.Type;
 import graphql.language.Value;
 import graphql.language.VariableDefinition;
@@ -16,11 +21,8 @@ import graphql.language.VariableReference;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.util.TraversalControl;
 import graphql.util.TraverserContext;
-
+import java.util.List;
 import java.util.Map;
-
-import static com.atlassian.braid.source.NamespacedVariableReference.namespacedVariableReference;
-import static java.util.stream.Collectors.toList;
 
 public class VariableNamespacingGraphQLQueryVisitor extends NodeVisitorStub {
     private final int counter;
@@ -43,8 +45,42 @@ public class VariableNamespacingGraphQLQueryVisitor extends NodeVisitorStub {
 
     @Override
     public TraversalControl visitField(Field node, TraverserContext<Node> traverserContext) {
-        node.setArguments(node.getArguments().stream().map(this::namespaceReferences).collect(toList()));
-        node.setDirectives(node.getDirectives().stream().map(this::namespaceReferences).collect(toList()));
+        if (traverserContext.getPhase().equals(TraverserContext.Phase.ENTER)) {
+//          traverserContext.changeNode(node.transform(b -> {
+//            b.arguments(
+//              node.getArguments().stream().map(this::namespaceReferences).collect(toList()));
+//            b.directives(
+//              node.getDirectives().stream().map(this::namespaceReferences).collect(toList()));
+//          }));
+
+          if(!node.getArguments().getClass().getSimpleName().equals("SingletonList")){
+            List<Argument> arguments = node.getArguments().stream().map(this::namespaceReferences).collect(toList());
+            node.getArguments().clear();
+            arguments.forEach(b -> node.getArguments().add(b));
+
+            List<Directive> directives = node.getDirectives().stream().map(this::namespaceReferences).collect(toList());
+            node.getDirectives().clear();
+            directives.forEach(b -> node.getDirectives().add(b));
+          }
+
+        } else if (traverserContext.getPhase().equals(TraverserContext.Phase.LEAVE)) {
+          if (traverserContext.getParentNode() == null) {
+            traverserContext.setAccumulate(traverserContext.thisNode());
+          } else {
+            Node parentNode = traverserContext.getParentNode();
+            if (parentNode instanceof SelectionSet) {
+              traverserContext.getParentContext()
+                .changeNode(((SelectionSet) parentNode).transform(b -> {
+                  List<Selection> sels = ((SelectionSet) parentNode).getSelections();
+                  int swap = sels.indexOf(traverserContext.originalThisNode());
+                  sels.set(swap, (Field) traverserContext.thisNode());
+                  b.selections(sels);
+                }));
+            } else {
+              throw new RuntimeException("Missing impl " + parentNode.getClass().getName());
+            }
+          }
+        }
         return TraversalControl.CONTINUE;
     }
 
@@ -96,7 +132,8 @@ public class VariableNamespacingGraphQLQueryVisitor extends NodeVisitorStub {
         final VariableReference value =  namespacedVariableReference(newName);
         final Type type = findVariableType(varRef, queryType);
 
-        variables.put(newName, environment.getExecutionContext().getVariables().get(varRef.getName()));
+        variables.put(newName, environment.getVariables().get(varRef.getName()));
+
         queryOp.getVariableDefinitions().add(new VariableDefinition(newName, type));
         return value;
     }

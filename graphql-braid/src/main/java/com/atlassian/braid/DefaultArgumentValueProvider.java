@@ -1,10 +1,10 @@
 package com.atlassian.braid;
 
-import graphql.schema.DataFetchingEnvironment;
-
-import java.util.concurrent.CompletableFuture;
-
 import static java.util.concurrent.CompletableFuture.completedFuture;
+
+import graphql.schema.DataFetchingEnvironment;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class DefaultArgumentValueProvider implements ArgumentValueProvider {
     public static final ArgumentValueProvider INSTANCE = new DefaultArgumentValueProvider();
@@ -16,7 +16,9 @@ public class DefaultArgumentValueProvider implements ArgumentValueProvider {
                 return BatchLoaderUtils.getFieldValue(environment, linkArgument.getSourceName())
                         .thenApply(v -> v.orElse(null));
             case CONTEXT:
-                throw new UnsupportedOperationException("not supported in default implementation");
+                Map<String,Object> context = (Map<String, Object>) environment.getVariables().get(linkArgument.getSourceName());
+                return completedFuture(context);
+//                throw new UnsupportedOperationException("not supported in default implementation");
             case FIELD_ARGUMENT:
                 return completedFuture(environment.getArgument(linkArgument.getSourceName()));
             default:

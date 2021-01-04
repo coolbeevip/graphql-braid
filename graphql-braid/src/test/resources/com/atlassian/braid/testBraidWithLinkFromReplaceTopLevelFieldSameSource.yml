@@ -43,6 +43,7 @@ schemaSources:
               bar100: barId
           }
         variables: {}
+        operationName: Bulk_Bar
       - query: |
           query Bulk_Bar($id100: String) {
               bar100: topbar(id: $id100) {

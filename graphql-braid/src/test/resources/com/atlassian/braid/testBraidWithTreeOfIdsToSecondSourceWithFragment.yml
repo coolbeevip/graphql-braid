@@ -87,6 +87,7 @@ schemaSources:
 
       variables:
         contentId100: fooid1
+      operationName: Bulk_Foo
     response:
       data:
         fooobject100:

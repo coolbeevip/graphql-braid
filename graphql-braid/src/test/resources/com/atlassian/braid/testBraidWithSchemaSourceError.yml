@@ -21,12 +21,11 @@ response:
   errors:
     - message: bad rating
       path:
-        - foo
-        - bar
-        - baz
+        - baz100
         - rating
       extensions:
         somekey: somevalue
+        classification: DataFetchingException
   data:
     foo:
       id: fooid
@@ -86,7 +85,7 @@ schemaSources:
       }
       type Query {
           topbar(id: String) : Bar
-      
+
       }
       type Bar {
           id: String

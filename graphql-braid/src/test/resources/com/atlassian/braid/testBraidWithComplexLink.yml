@@ -14,13 +14,12 @@ request:
     inParam: baz1
 
 response:
-  errors: []
-  data:
-    foo:
-      id: fooid
-      name: Foo
-      barAlias:
-        titleAlias: Bar
+  errors:
+    - message: "Validation error of type UnknownArgument: Unknown field argument inputParam @ 'foo/bar'"
+      locations: [{line: 5, column: 19}]
+      extensions:
+        classification: ValidationError
+  data: null
 
 schemaSources:
   - namespace: foo
@@ -79,7 +78,7 @@ schemaSources:
       }
       type Query {
           topbar(id: String, site: String, baz: String) : Bar
-      
+
       }
       type Bar {
           title: String

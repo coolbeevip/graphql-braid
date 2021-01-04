@@ -1,13 +1,12 @@
 package com.atlassian.braid.source;
 
-import graphql.ErrorType;
+import static java.util.Objects.requireNonNull;
+
+import graphql.ErrorClassification;
 import graphql.GraphQLError;
 import graphql.language.SourceLocation;
-
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Wraps an error and removes the first path entry
@@ -30,7 +29,7 @@ public class RelativeGraphQLError implements GraphQLError {
     }
 
     @Override
-    public ErrorType getErrorType() {
+    public ErrorClassification getErrorType() {
         return delegate.getErrorType();
     }
 

@@ -1,5 +1,19 @@
 package com.atlassian.braid.source;
 
+import static com.atlassian.braid.graphql.language.DocumentTransformations.removeMissingFieldsIfBraidAndSourceTypeFieldsDiffer;
+import static com.atlassian.braid.graphql.language.DocumentTransformations.renameTypesToSourceNames;
+import static com.atlassian.braid.java.util.BraidCollectors.SingletonCharacteristics.ALLOW_MULTIPLE_OCCURRENCES;
+import static com.atlassian.braid.java.util.BraidCollectors.nullSafeToMap;
+import static com.atlassian.braid.java.util.BraidCollectors.singleton;
+import static graphql.language.OperationDefinition.Operation.MUTATION;
+import static graphql.language.OperationDefinition.Operation.QUERY;
+import static graphql.schema.GraphQLTypeUtil.unwrapAll;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.CompletableFuture.completedFuture;
+import static java.util.stream.Collectors.toList;
+
 import com.atlassian.braid.BatchLoaderEnvironment;
 import com.atlassian.braid.BatchLoaderFactory;
 import com.atlassian.braid.BraidContext;
@@ -26,8 +40,6 @@ import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import org.dataloader.BatchLoader;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,19 +51,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-
-import static com.atlassian.braid.graphql.language.DocumentTransformations.removeMissingFieldsIfBraidAndSourceTypeFieldsDiffer;
-import static com.atlassian.braid.graphql.language.DocumentTransformations.renameTypesToSourceNames;
-import static com.atlassian.braid.java.util.BraidCollectors.SingletonCharacteristics.ALLOW_MULTIPLE_OCCURRENCES;
-import static com.atlassian.braid.java.util.BraidCollectors.nullSafeToMap;
-import static com.atlassian.braid.java.util.BraidCollectors.singleton;
-import static graphql.language.OperationDefinition.Operation.MUTATION;
-import static graphql.language.OperationDefinition.Operation.QUERY;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.stream.Collectors.toList;
+import org.dataloader.BatchLoader;
 
 /**
  * Executes a query against the data source
@@ -142,7 +142,7 @@ class QueryExecutor<C> implements BatchLoaderFactory {
                                 if (fieldTransformationContext.getMissingFields().isEmpty()) {
                                     return dfr;
                                 } else {
-                                    ((BraidContext) environments.get(0).getContext()).addMissingFields(fieldOutputType.getName(), fieldTransformationContext.getMissingFields());
+                                    ((BraidContext) environments.get(0).getContext()).addMissingFields(unwrapAll(fieldOutputType).getName(), fieldTransformationContext.getMissingFields());
                                     return dfr;
                                 }
                             })
@@ -282,9 +282,9 @@ class QueryExecutor<C> implements BatchLoaderFactory {
                 break;
             }
         }
-        String originalTypeName = braidSchemaSource.getTypeRenameFromBraidName(type.getName())
+        String originalTypeName = braidSchemaSource.getTypeRenameFromBraidName(unwrapAll(type).getName())
                 .map(TypeRename::getSourceName)
-                .orElse(type.getName());
+                .orElse(unwrapAll(type).getName());
         return "Bulk_" + originalTypeName;
     }
 

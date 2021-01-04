@@ -1,5 +1,14 @@
 package com.atlassian.braid.transformation;
 
+import static com.atlassian.braid.ArgumentValueProvider.staticArgumentValue;
+import static com.atlassian.braid.BatchLoaderUtils.getTargetIdsFromEnvironment;
+import static com.atlassian.braid.LinkUtils.resolveArgumentsForLink;
+import static com.atlassian.braid.transformation.QueryTransformationUtils.addFieldToQuery;
+import static com.atlassian.braid.transformation.QueryTransformationUtils.cloneTrimAndAliasField;
+import static com.atlassian.braid.transformation.QueryTransformationUtils.getOperationDefinition;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+
 import com.atlassian.braid.FieldKey;
 import com.atlassian.braid.FieldTransformation;
 import com.atlassian.braid.FieldTransformationContext;
@@ -13,7 +22,6 @@ import graphql.language.OperationDefinition;
 import graphql.language.Selection;
 import graphql.language.VariableDefinition;
 import graphql.schema.DataFetchingEnvironment;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,15 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import static com.atlassian.braid.ArgumentValueProvider.staticArgumentValue;
-import static com.atlassian.braid.BatchLoaderUtils.getTargetIdsFromEnvironment;
-import static com.atlassian.braid.LinkUtils.resolveArgumentsForLink;
-import static com.atlassian.braid.transformation.QueryTransformationUtils.addFieldToQuery;
-import static com.atlassian.braid.transformation.QueryTransformationUtils.cloneTrimAndAliasField;
-import static com.atlassian.braid.transformation.QueryTransformationUtils.getOperationDefinition;
-import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -126,7 +125,7 @@ public class LinkTransformation implements FieldTransformation {
             link.getCustomTransformation().createQuery(field.field, null);
             return;
         }
-        field.field.setName(link.getTopLevelQueryField());
+        field.field = field.field.transform(f -> f.name(link.getTopLevelQueryField()));
 
         List<Argument> fieldArguments = new ArrayList<>(resolvedArguments.size());
         List<VariableDefinition> variableDefinitions = fieldTransformationContext.getQueryOp()
@@ -138,7 +137,7 @@ public class LinkTransformation implements FieldTransformation {
                     .put(resolvedArgument.getVariableDefinition().getName(), resolvedArgument.getValue());
         }
 
-        field.field.setArguments(fieldArguments);
+        field.field = field.field.transform(f -> f.arguments(fieldArguments));
     }
 
 
