@@ -1,5 +1,12 @@
 package com.atlassian.braid.transformation;
 
+import static com.atlassian.braid.TypeUtils.DEFAULT_QUERY_TYPE_NAME;
+import static com.atlassian.braid.TypeUtils.findMutationType;
+import static com.atlassian.braid.TypeUtils.findQueryType;
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
+import static java.util.stream.Collectors.toList;
+
 import com.atlassian.braid.Extension;
 import com.atlassian.braid.FieldRename;
 import com.atlassian.braid.Link;
@@ -15,21 +22,13 @@ import graphql.language.Type;
 import graphql.language.TypeDefinition;
 import graphql.language.TypeName;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-
-import static com.atlassian.braid.TypeUtils.DEFAULT_QUERY_TYPE_NAME;
-import static com.atlassian.braid.TypeUtils.findMutationType;
-import static com.atlassian.braid.TypeUtils.findQueryType;
-import static java.util.Objects.requireNonNull;
-import static java.util.Optional.empty;
-import static java.util.stream.Collectors.toList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This wraps a {@link SchemaSource} to enhance it with helper functions
@@ -179,6 +178,7 @@ public final class BraidSchemaSource {
                                 .type(renameTypeToBraidName(input.getType()))
                                 .defaultValue(input.getDefaultValue())
                                 .directives(input.getDirectives())
+                                .description(input.getDescription()) // 解决 input 类型的注释消失的问题
                                 .build())
                 .collect(toList());
     }

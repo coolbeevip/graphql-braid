@@ -1,0 +1,41 @@
+request:
+  query: |
+    query {
+      __schema {
+        queryType{
+          fields{
+            name
+            description
+          }
+        }
+      }
+    }
+  variables:
+    id: fooid
+
+response:
+  errors: []
+  data:
+    __schema:
+      queryType:
+        fields:
+          - name: foo
+            description: foo as a query type
+
+schemaSources:
+  - namespace: foo
+    schema: |
+      schema {
+          query: Query
+      }
+      type Query {
+          """
+          foo as a query type
+          """
+          foo(id: String) : Foo
+      }
+      type Foo {
+          id: String
+          name: String
+          bar: Int
+      }

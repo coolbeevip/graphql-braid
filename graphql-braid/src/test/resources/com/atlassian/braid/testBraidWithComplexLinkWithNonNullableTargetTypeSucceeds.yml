@@ -15,15 +15,11 @@ request:
 
 response:
   errors:
-    - message: bad rating
+    - message: "Validation error of type UnknownArgument: Unknown field argument inputParam @ 'foo/bar'"
+      locations: [{line: 5, column: 19}]
       extensions:
-        somekey: somevalue
-    - message: "Cannot return null for non-nullable type: 'Bar' within parent 'Foo' (/foo/barAlias)"
-      path:
-        - foo
-        - barAlias
-  data:
-    foo: null
+        classification: ValidationError
+  data: null
 
 schemaSources:
   - namespace: foo
@@ -83,7 +79,7 @@ schemaSources:
       }
       type Query {
           topbar(id: String, site: String, baz: String) : Bar
-      
+
       }
       type Bar {
           title: String
@@ -99,13 +95,6 @@ schemaSources:
         id100: fooid
         site100: site1
         baz100: baz1
-    response:
-      data:
-        bar100: null
-      errors:
-        - message: bad rating
-          extensions:
-            somekey: somevalue
 
 
 

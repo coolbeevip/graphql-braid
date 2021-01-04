@@ -2,11 +2,10 @@ package com.atlassian.braid.transformation;
 
 import graphql.language.Field;
 import graphql.language.FragmentDefinition;
-
 import java.util.List;
 
 class FieldWithCounter {
-    final Field field;
+    Field field;
     final int counter;
     final List<FragmentDefinition> referencedFragments;
 

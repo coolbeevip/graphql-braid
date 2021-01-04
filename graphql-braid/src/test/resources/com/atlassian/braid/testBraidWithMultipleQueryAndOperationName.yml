@@ -10,7 +10,7 @@ request:
         id2
       }
     }
-  operation: myQuery1
+  operationName: myQuery1
 
 response:
   errors: []

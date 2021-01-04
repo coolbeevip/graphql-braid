@@ -1,10 +1,14 @@
 package com.atlassian.braid.source;
 
+import static com.atlassian.braid.LinkArgument.ArgumentSource.OBJECT_FIELD;
+import static graphql.analysis.QueryTraverser.newQueryTraverser;
+import static java.lang.String.format;
+
 import com.atlassian.braid.Link;
 import com.atlassian.braid.LinkArgument;
 import com.atlassian.braid.SchemaSource;
 import com.atlassian.braid.transformation.BraidSchemaSource;
-import graphql.analysis.QueryTraversal;
+import graphql.analysis.QueryTraverser;
 import graphql.analysis.QueryVisitor;
 import graphql.analysis.QueryVisitorFieldEnvironment;
 import graphql.analysis.QueryVisitorStub;
@@ -21,7 +25,6 @@ import graphql.schema.GraphQLFieldsContainer;
 import graphql.schema.GraphQLObjectType;
 import graphql.util.TraversalControl;
 import graphql.util.TraverserContext;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -32,10 +35,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.atlassian.braid.LinkArgument.ArgumentSource.OBJECT_FIELD;
-import static graphql.analysis.QueryTraversal.newQueryTraversal;
-import static java.lang.String.format;
 
 public class TrimFieldsSelection {
 
@@ -77,12 +76,12 @@ public class TrimFieldsSelection {
                 .stream().collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().deepCopy()));
 
 
-        QueryTraversal queryTraversal = newQueryTraversal()
+      QueryTraverser queryTraversal = newQueryTraverser()
                 .schema(environment.getGraphQLSchema())
                 .root(root)
                 .rootParentType((GraphQLObjectType) environment.getParentType())
                 .fragmentsByName(fragmentsByName)
-                .variables(environment.getExecutionContext().getVariables()).build();
+                .variables(environment.getVariables()).build();
         queryTraversal.visitPreOrder(nodeVisitor);
 
         fieldWithLinks.forEach(TrimFieldsSelection::addLinkArgumentsToSourceSelections);
@@ -174,7 +173,7 @@ public class TrimFieldsSelection {
 
 
     private static class FieldWithLink {
-        public final Field field;
+        public Field field;
         public final Link link;
         public final SelectionSet parentSelectionSet;
 

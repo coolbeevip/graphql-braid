@@ -1,5 +1,14 @@
 package com.atlassian.braid.transformation;
 
+import static com.atlassian.braid.LinkArgument.ArgumentSource.FIELD_ARGUMENT;
+import static com.atlassian.braid.LinkArgument.ArgumentSource.OBJECT_FIELD;
+import static com.atlassian.braid.TypeUtils.findMutationType;
+import static com.atlassian.braid.TypeUtils.findQueryType;
+import static com.atlassian.braid.transformation.DataFetcherUtils.getLinkDataLoaderKey;
+import static java.lang.String.format;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import com.atlassian.braid.BatchLoaderEnvironment;
 import com.atlassian.braid.Link;
 import com.atlassian.braid.LinkArgument;
@@ -17,11 +26,7 @@ import graphql.language.TypeDefinition;
 import graphql.language.TypeName;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import org.dataloader.BatchLoader;
-import org.dataloader.DataLoader;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,15 +35,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.atlassian.braid.LinkArgument.ArgumentSource.FIELD_ARGUMENT;
-import static com.atlassian.braid.LinkArgument.ArgumentSource.OBJECT_FIELD;
-import static com.atlassian.braid.TypeUtils.findMutationType;
-import static com.atlassian.braid.TypeUtils.findQueryType;
-import static com.atlassian.braid.transformation.DataFetcherUtils.getLinkDataLoaderKey;
-import static java.lang.String.format;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
+import org.dataloader.BatchLoader;
+import org.dataloader.DataLoader;
 
 /**
  * A {@link SchemaTransformation} for processing links, which add fields to source object types. The field to add is
@@ -136,48 +134,94 @@ public class LinkSchemaTransformation implements SchemaTransformation {
                         link.getTopLevelQueryField(), link.getTargetNamespace(), link.getNewFieldName(), link.getSourceNamespace())));
     }
 
-    private static void modifySchema(Link link, ObjectTypeDefinition typeDefinition, Optional<FieldDefinition> newField,
-                                     FieldDefinition topLevelField) {
-        Map<String, FieldDefinition> objectFields = typeDefinition.getFieldDefinitions()
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(toMap(FieldDefinition::getName, identity()));
+//    private static ObjectTypeDefinition modifySchema(Link link, ObjectTypeDefinition typeDefinition, Optional<FieldDefinition> newField,
+//                                     FieldDefinition topLevelField) {
+//
+//        ObjectTypeDefinition newDefinition = typeDefinition;
+//        List<FieldDefinition> fieldDefs = newDefinition.getFieldDefinitions();
+//
+//        Map<String, FieldDefinition> objectFields = typeDefinition.getFieldDefinitions()
+//                .stream()
+//                .filter(Objects::nonNull)
+//                .collect(toMap(FieldDefinition::getName, identity()));
+//
+//
+//        link.getLinkArguments().stream()
+//                .filter(linkArgument -> linkArgument.getArgumentSource() == OBJECT_FIELD
+//                        && linkArgument.isRemoveInputField())
+//                .map(LinkArgument::getSourceName)
+//                .forEach(fieldToRemove -> {
+//                    Optional.ofNullable(objectFields.get(fieldToRemove))
+//                            .ifPresent(fieldDef -> fieldDefs.remove(fieldDef));
+//                });
+//
+//        final Type targetType = new TypeName(link.getTargetType());
+//        if (!newField.isPresent()) {
+//          FieldDefinition field = new FieldDefinition(link.getNewFieldName(),
+//            adjustTypeForSimpleLink(link, objectFields, targetType));
+//
+//          List<InputValueDefinition> inputValueDefs = link.getLinkArguments().stream()
+//            .filter(linkArgument -> linkArgument.getArgumentSource() == FIELD_ARGUMENT)
+//            .flatMap(linkArgument -> buildInputValueDefinitionForLink(topLevelField, linkArgument))
+//            .collect(Collectors.toList());
+//          field = field.transform(b -> b.inputValueDefinitions(inputValueDefs));
+//          fieldDefs.add(field);
+//        } else if (isListType(newField.get().getType())) {
+//          fieldDefs.remove(newField.get());
+//            if (newField.get().getType() instanceof NonNullType) {
+//              fieldDefs.add(newField.get().transform(b-> b.type(new NonNullType(new ListType(targetType)))));
+//            } else {
+//              fieldDefs.add(newField.get().transform(b -> b.type(new ListType(targetType))));
+//            }
+//        } else {
+//          fieldDefs.remove(newField.get());
+//          fieldDefs.add(newField.get().transform(b -> b.type(targetType)));
+//        }
+//        return newDefinition.transform(b -> b.fieldDefinitions(fieldDefs));
+//    }
+
+  private static void modifySchema(Link link, ObjectTypeDefinition typeDefinition, Optional<FieldDefinition> newField,
+    FieldDefinition topLevelField) {
+    Map<String, FieldDefinition> objectFields = typeDefinition.getFieldDefinitions()
+      .stream()
+      .filter(Objects::nonNull)
+      .collect(toMap(FieldDefinition::getName, identity()));
 
 
-        link.getLinkArguments().stream()
-                .filter(linkArgument -> linkArgument.getArgumentSource() == OBJECT_FIELD
-                        && linkArgument.isRemoveInputField())
-                .map(LinkArgument::getSourceName)
-                .forEach(fieldToRemove -> {
-                    Optional.ofNullable(objectFields.get(fieldToRemove))
-                            .ifPresent(fieldDef -> typeDefinition.getFieldDefinitions().remove(fieldDef));
-                });
+    link.getLinkArguments().stream()
+      .filter(linkArgument -> linkArgument.getArgumentSource() == OBJECT_FIELD
+        && linkArgument.isRemoveInputField())
+      .map(LinkArgument::getSourceName)
+      .forEach(fieldToRemove -> {
+        Optional.ofNullable(objectFields.get(fieldToRemove))
+          .ifPresent(fieldDef -> typeDefinition.getFieldDefinitions().remove(fieldDef));
+      });
 
-        Type targetType = new TypeName(link.getTargetType());
-        targetType = link.targetNonNullable() ? NonNullType.newNonNullType(targetType).build() : targetType;
+    Type targetType = new TypeName(link.getTargetType());
+    targetType = link.targetNonNullable() ? NonNullType.newNonNullType(targetType).build() : targetType;
 
-        if (!newField.isPresent()) {
-            targetType = adjustTypeForSimpleLink(link, objectFields, targetType);
+    if (!newField.isPresent()) {
+      targetType = adjustTypeForSimpleLink(link, objectFields, targetType);
 
-            FieldDefinition field = new FieldDefinition(link.getNewFieldName(), targetType);
+      FieldDefinition field = new FieldDefinition(link.getNewFieldName(), targetType);
 
-            List<InputValueDefinition> inputValueDefs = link.getLinkArguments().stream()
-                    .filter(linkArgument -> linkArgument.getArgumentSource() == FIELD_ARGUMENT)
-                    .flatMap(linkArgument -> buildInputValueDefinitionForLink(topLevelField, linkArgument))
-                    .collect(Collectors.toList());
-            field.getInputValueDefinitions().addAll(inputValueDefs);
-            typeDefinition.getFieldDefinitions().add(field);
-        } else if (isListType(newField.get().getType())) {
-            if (newField.get().getType() instanceof NonNullType) {
-                newField.get().setType(new NonNullType(new ListType(targetType)));
-            } else {
-                newField.get().setType(new ListType(targetType));
-            }
-        } else {
-            // Change source field type to the braided type
-            newField.get().setType(targetType);
-        }
+      List<InputValueDefinition> inputValueDefs = link.getLinkArguments().stream()
+        .filter(linkArgument -> linkArgument.getArgumentSource() == FIELD_ARGUMENT)
+        .flatMap(linkArgument -> buildInputValueDefinitionForLink(topLevelField, linkArgument))
+        .collect(Collectors.toList());
+      field.getInputValueDefinitions().addAll(inputValueDefs);
+      typeDefinition.getFieldDefinitions().add(field);
+    } else if (isListType(newField.get().getType())) {
+      if (newField.get().getType() instanceof NonNullType) {
+        newField.get().setType(new NonNullType(new ListType(targetType)));
+      } else {
+        newField.get().setType(new ListType(targetType));
+      }
+    } else {
+      // Change source field type to the braided type
+      newField.get().setType(targetType);
     }
+  }
 
     private static Stream<InputValueDefinition> buildInputValueDefinitionForLink(FieldDefinition topLevelField, LinkArgument linkArgument) {
         return topLevelField.getInputValueDefinitions().stream()

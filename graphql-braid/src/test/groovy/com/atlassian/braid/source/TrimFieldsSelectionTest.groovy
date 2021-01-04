@@ -112,7 +112,8 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
@@ -120,7 +121,7 @@ class TrimFieldsSelectionTest {
         def rootField = (query.definitions[0] as OperationDefinition).selectionSet.selections[0] as Field
 
         TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
-        String expectedQuery = "foo { barId }"
+        String expectedQuery = "foo {barId}"
         assertEquals(expectedQuery, AstPrinter.printAstCompact(rootField))
     }
 
@@ -135,7 +136,8 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
@@ -143,7 +145,7 @@ class TrimFieldsSelectionTest {
         def rootField = (query.definitions[0] as OperationDefinition).selectionSet.selections[0] as Field
 
         TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
-        String expectedQuery = "foo { barId bar2 }"
+        String expectedQuery = "foo {barId bar2}"
         assertEquals(expectedQuery, AstPrinter.printAstCompact(rootField))
     }
 
@@ -164,16 +166,17 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
         def query = parseQuery("""
             { foo { ...FooFragment  } }
-            
+
             fragment BarFragment on Bar {
                 myId
-            }                
+            }
             fragment FooFragment on Foo {
                 bar {
                 ...BarFragment
@@ -203,16 +206,17 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
         def query = parseQuery("""
             { foo { ...FooFragment  } }
-            
+
             fragment BarFragment on Bar {
                 myId
-            }                
+            }
             fragment FooFragment on Foo {
                 bar {
                 ...BarFragment
@@ -270,7 +274,8 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
@@ -278,7 +283,7 @@ class TrimFieldsSelectionTest {
         def rootField = (query.definitions[0] as OperationDefinition).selectionSet.selections[0] as Field
 
         TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
-        String expectedQuery = "unionField { __typename }"
+        String expectedQuery = "unionField {__typename}"
         assertEquals(expectedQuery, AstPrinter.printAstCompact(rootField))
 
     }
@@ -307,7 +312,8 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
@@ -315,7 +321,7 @@ class TrimFieldsSelectionTest {
         def rootField = (query.definitions[0] as OperationDefinition).selectionSet.selections[0] as Field
 
         TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
-        String expectedQuery = "foo { barId }"
+        String expectedQuery = "foo {barId}"
         assertEquals(expectedQuery, AstPrinter.printAstCompact(rootField))
     }
 
@@ -335,16 +341,17 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
         def query = parseQuery("""
             { foo { ...FooFragment  } }
-            
+
             fragment BarFragment on Bar {
                 myId
-            }                
+            }
             fragment FooFragment on Foo {
                 barId
                 bar {
@@ -360,8 +367,8 @@ class TrimFieldsSelectionTest {
         def referencedFragments = TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
         assertEquals(1, referencedFragments.size())
 
-        assertEquals("fragment FooFragment on Foo { barId }", AstPrinter.printAstCompact(referencedFragments.get(0)));
-        assertEquals("foo { ...FooFragment }", AstPrinter.printAstCompact(rootField))
+        assertEquals("fragment FooFragment on Foo {barId}", AstPrinter.printAstCompact(referencedFragments.get(0)));
+        assertEquals("foo {...FooFragment}", AstPrinter.printAstCompact(rootField))
     }
 
     @Test
@@ -387,7 +394,8 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
@@ -395,7 +403,7 @@ class TrimFieldsSelectionTest {
         def rootField = (query.definitions[0] as OperationDefinition).selectionSet.selections[0] as Field
 
         TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
-        String expectedQuery = "foo { bar2 }"
+        String expectedQuery = "foo {bar2}"
         assertEquals(expectedQuery, AstPrinter.printAstCompact(rootField))
     }
 
@@ -422,7 +430,8 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
@@ -430,7 +439,7 @@ class TrimFieldsSelectionTest {
         def rootField = (query.definitions[0] as OperationDefinition).selectionSet.selections[0] as Field
 
         TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
-        String expectedQuery = "foo { myAlias: barId barId }"
+        String expectedQuery = "foo {myAlias:barId barId}"
         assertEquals(expectedQuery, AstPrinter.printAstCompact(rootField))
     }
 
@@ -459,7 +468,8 @@ class TrimFieldsSelectionTest {
         when(environment.getGraphQLSchema()).thenReturn(overallSchema)
         when(environment.getParentType()).thenReturn(overallSchema.getType("Query") as GraphQLType)
         def context = mock(ExecutionContext)
-        when(environment.getExecutionContext()).thenReturn(context)
+        //when(environment.getExecutionContext()).thenReturn(context)
+        when(environment.getContext()).thenReturn(context)
         when(context.getVariables()).thenReturn(new LinkedHashMap<String, Object>())
 
 
@@ -467,7 +477,7 @@ class TrimFieldsSelectionTest {
         def rootField = (query.definitions[0] as OperationDefinition).selectionSet.selections[0] as Field
 
         TrimFieldsSelection.trimFieldSelection(schemaSource, environment, rootField, false)
-        String expectedQuery = "foo { barId bar2 }"
+        String expectedQuery = "foo {barId bar2}"
         assertEquals(expectedQuery, AstPrinter.printAstCompact(rootField))
     }
 

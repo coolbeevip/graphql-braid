@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.atlassian.pom</groupId>
-        <artifactId>public-pom</artifactId>
-        <version>5.0.7</version>
-    </parent>
+<!--    <parent>-->
+<!--        <groupId>com.atlassian.pom</groupId>-->
+<!--        <artifactId>public-pom</artifactId>-->
+<!--        <version>5.0.7</version>-->
+<!--    </parent>-->
 
     <groupId>com.atlassian.braid</groupId>
     <artifactId>graphql-braid</artifactId>
     <version>0.23.6-SNAPSHOT</version>
     <name>GraphQL Braid</name>
 
-    <issueManagement>
-        <system>Bitbucket</system>
-        <url>https://bitbucket.org/atlassian/graphql-braid/issues</url>
-    </issueManagement>
+<!--    <issueManagement>-->
+<!--        <system>Bitbucket</system>-->
+<!--        <url>https://bitbucket.org/atlassian/graphql-braid/issues</url>-->
+<!--    </issueManagement>-->
 
-    <scm>
-        <url>https://bitbucket.org/atlassian/graphql-braid</url>
-        <connection>scm:git:git@bitbucket.org:atlassian/graphql-braid.git</connection>
-        <developerConnection>scm:git:git@bitbucket.org:atlassian/graphql-braid.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
+<!--    <scm>-->
+<!--        <url>https://bitbucket.org/atlassian/graphql-braid</url>-->
+<!--        <connection>scm:git:git@bitbucket.org:atlassian/graphql-braid.git</connection>-->
+<!--        <developerConnection>scm:git:git@bitbucket.org:atlassian/graphql-braid.git</developerConnection>-->
+<!--        <tag>HEAD</tag>-->
+<!--    </scm>-->
 
     <licenses>
         <license>
@@ -33,6 +33,11 @@
     </licenses>
 
     <dependencies>
+      <dependency>
+        <groupId>com.coolbeevip.graphql</groupId>
+        <artifactId>graphql-java</artifactId>
+        <version>${graphql.version}</version>
+      </dependency>
 
         <dependency>
             <groupId>com.graphql-java</groupId>
@@ -146,21 +151,21 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
 
-        <graphql.version>11.0</graphql.version>
+        <graphql.version>14.0</graphql.version>
         <jackson.version>2.9.7</jackson.version>
         <spring.framework.version>4.3.17.RELEASE</spring.framework.version>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>maven-atlassian-com</id>
-            <name>Atlassian Public Repository</name>
-            <url>https://packages.atlassian.com/maven/public</url>
-        </repository>
-        <snapshotRepository>
-            <id>maven-atlassian-com</id>
-            <name>Atlassian Public Snapshot Repository</name>
-            <url>https://packages.atlassian.com/maven/public-snapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>maven-atlassian-com</id>-->
+<!--            <name>Atlassian Public Repository</name>-->
+<!--            <url>https://packages.atlassian.com/maven/public</url>-->
+<!--        </repository>-->
+<!--        <snapshotRepository>-->
+<!--            <id>maven-atlassian-com</id>-->
+<!--            <name>Atlassian Public Snapshot Repository</name>-->
+<!--            <url>https://packages.atlassian.com/maven/public-snapshot</url>-->
+<!--        </snapshotRepository>-->
+<!--    </distributionManagement>-->
 </project>

@@ -1,10 +1,17 @@
 package com.atlassian.braid.transformation;
 
+import static com.atlassian.braid.TypeUtils.unwrap;
+import static graphql.schema.DataFetchingEnvironmentImpl.newDataFetchingEnvironment;
+import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+
 import com.atlassian.braid.Extension;
 import com.atlassian.braid.SchemaSource;
 import com.atlassian.braid.graphql.language.KeyedDataFetchingEnvironment;
 import com.atlassian.braid.java.util.BraidObjects;
 import graphql.execution.DataFetcherResult;
+import graphql.execution.MergedField;
 import graphql.language.Field;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -13,19 +20,11 @@ import graphql.language.TypeName;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
-import org.dataloader.BatchLoader;
-
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static com.atlassian.braid.TypeUtils.unwrap;
-import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvironment;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
+import javax.annotation.Nullable;
+import org.dataloader.BatchLoader;
 
 /**
  * A {@link SchemaTransformation} for processing extensions, which add fields to source object types. The fields to add
@@ -127,7 +126,7 @@ public class ExtensionSchemaTransformation implements SchemaTransformation {
         return newDataFetchingEnvironment(env)
                 .source(env.getSource())
                 .fieldDefinition(graphQLSchema.getObjectType(ds.getBraidTypeName(typeDef.getName())).getFieldDefinition(fieldDef.getName()))
-                .fields(singletonList(new Field(fieldDef.getName())))
+                .mergedField(MergedField.newMergedField(Field.newField(fieldDef.getName()).build()).build())
                 .fieldType(graphQLSchema.getObjectType(((TypeName) fieldDef.getType()).getName()))
                 .parentType(graphQLSchema.getObjectType("Query"))
                 .build();

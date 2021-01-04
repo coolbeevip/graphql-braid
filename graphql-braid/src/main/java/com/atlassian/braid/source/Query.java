@@ -1,14 +1,13 @@
 package com.atlassian.braid.source;
 
+import static com.atlassian.braid.graphql.language.GraphQLNodes.printNode;
+
 import graphql.ExecutionInput;
 import graphql.language.Document;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-
-import static com.atlassian.braid.graphql.language.GraphQLNodes.printNode;
 
 public class Query {
     private final Document query;
@@ -27,13 +26,12 @@ public class Query {
     }
 
     public ExecutionInput asExecutionInput() {
-        return new ExecutionInput(
-                printNode(query),
-                operationName,
-                context,
-                root,
-                variables
-        );
+        return ExecutionInput.newExecutionInput(printNode(query))
+          .operationName(operationName)
+          .context(context)
+          .root(root)
+          .variables(variables)
+          .build();
     }
 
     public Document getQuery() {
@@ -64,8 +62,8 @@ public class Query {
      *
      * @return a new Query object based on calling build on that builder
      */
-    public Query transform(Consumer<Query.Builder> builderConsumer) {
-        Query.Builder builder = new Query.Builder()
+    public Query transform(Consumer<Builder> builderConsumer) {
+        Builder builder = new Builder()
                 .query(this.query)
                 .operationName(this.operationName)
                 .context(this.context)
@@ -108,8 +106,8 @@ public class Query {
     /**
      * @return a new builder of Query objects
      */
-    public static Query.Builder newQuery() {
-        return new Query.Builder();
+    public static Builder newQuery() {
+        return new Builder();
     }
 
     public static class Builder {
@@ -120,27 +118,27 @@ public class Query {
         private Object root;
         private Map<String, Object> variables = Collections.emptyMap();
 
-        public Query.Builder query(Document query) {
+        public Builder query(Document query) {
             this.query = query;
             return this;
         }
 
-        public Query.Builder operationName(String operationName) {
+        public Builder operationName(String operationName) {
             this.operationName = operationName;
             return this;
         }
 
-        public Query.Builder context(Object context) {
+        public Builder context(Object context) {
             this.context = context;
             return this;
         }
 
-        public Query.Builder root(Object root) {
+        public Builder root(Object root) {
             this.root = root;
             return this;
         }
 
-        public Query.Builder variables(Map<String, Object> variables) {
+        public Builder variables(Map<String, Object> variables) {
             this.variables = variables;
             return this;
         }

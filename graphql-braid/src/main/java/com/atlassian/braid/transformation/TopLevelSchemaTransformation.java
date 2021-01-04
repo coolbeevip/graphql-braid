@@ -1,5 +1,14 @@
 package com.atlassian.braid.transformation;
 
+import static com.atlassian.braid.TypeUtils.unwrap;
+import static com.atlassian.braid.transformation.DataFetcherUtils.getDataLoaderKey;
+import static com.atlassian.braid.transformation.DataFetcherUtils.getLinkDataLoaderKey;
+import static graphql.schema.DataFetchingEnvironmentImpl.newDataFetchingEnvironment;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import com.atlassian.braid.BatchLoaderEnvironment;
 import com.atlassian.braid.FieldRename;
 import com.atlassian.braid.SchemaNamespace;
@@ -9,9 +18,6 @@ import graphql.language.ObjectTypeDefinition;
 import graphql.language.Type;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.dataloader.BatchLoader;
-import org.dataloader.DataLoader;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -20,15 +26,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static com.atlassian.braid.TypeUtils.unwrap;
-import static com.atlassian.braid.transformation.DataFetcherUtils.getDataLoaderKey;
-import static com.atlassian.braid.transformation.DataFetcherUtils.getLinkDataLoaderKey;
-import static graphql.schema.DataFetchingEnvironmentBuilder.newDataFetchingEnvironment;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import org.dataloader.BatchLoader;
+import org.dataloader.DataLoader;
 
 /**
  * A {@link SchemaTransformation} for processing top-level fields for the root operation type.
@@ -144,6 +143,8 @@ public class TopLevelSchemaTransformation implements SchemaTransformation {
                 FieldDefinition.newFieldDefinition()
                         .name(renamedFieldDefinition.fieldRename.getBraidName())
                         .type(renamedType)
+                        .description(definition.getDescription())  // 解决聚合后 Query 和 Mutation 后的接口没有注释的问题
+                        .comments(definition.getComments()) // 解决聚合后 Query 和 Mutation 后的接口没有注释的问题
                         .inputValueDefinitions(schemaSource.renameInputValueDefinitionsToBraidTypes(definition.getInputValueDefinitions()))
                         .directives(definition.getDirectives()).build());
     }
